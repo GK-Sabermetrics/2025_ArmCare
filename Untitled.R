@@ -118,3 +118,88 @@ PitcherArmExams %>% kable(format = "html",  linesep = "", label = "Pitch Stats",
 
 paste(data$`First Name`, data$`Last Name`) %>% unique()
 
+Pitcher[which.max(Pitcher$`Exam Date`),] %>%
+  summarise(`Exam Date`, `Arm Score`, `Total Strength`, `IRTARM RS`, `ERTARM RS`,
+            `STARM RS`, `GTARM RS`, `Shoulder Balance`)
+
+tester = 
+Pitcher[which.max(Pitcher$`Exam Date`),] %>%
+  summarise(`Exam Date`, `Arm Score`, `Total Strength`, `IRTARM RS`, `ERTARM RS`,
+            `STARM RS`, `GTARM RS`, `Shoulder Balance`)
+
+tester
+
+tester$`Arm Score` = cell_spec(tester$`Arm Score`, 
+                               color = ifelse(tester$`Arm Score`<80, 'red', 'black'))
+
+tester %>% kbl(format = 'html', escape = F) %>% kable_styling()
+
+# 70, 50
+
+x = 34
+ifelse(x < 50, 'red', ifelse(x < 70, 'orange', 'black'))
+
+tester %>% 
+  kable(format = "latex",  linesep = "", align = 'c', escape = FALSE,
+        caption = "TARM = Throwing Arm, RS = Relative Strength (Strength/Bodyweight)") %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 18) %>% 
+  row_spec(0, background = "#f76800", color = 'white', bold = T) %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(tester), border_right = TRUE) %>% 
+  add_header_above(c("Fresh - Quick Pre Exam" = 8), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800") %>% 
+  footnote(number = c("Internal Rotation", "External Rotation","Scaption", "Grip"),
+           general = c("Test"))
+
+colnames(tester)[4] = paste0("IRTARM RS", footnote_marker_number(1, format = "latex"))
+colnames(tester)[5] = paste0("ERTARM RS", footnote_marker_number(2))
+colnames(tester)[6] = paste0("STARM RS", footnote_marker_number(3))
+colnames(tester)[7] = paste0("GTARM RS", footnote_marker_number(4))
+colnames(tester)[8] = paste0("Shoulder Balance", footnote_marker_number(5))
+
+footnote_marker_alphabet(1)
+
+kbl(Pre.Exam.Stats, escape = F) %>% kable_styling(latex_options = 'scale_down')
+
+Pre.Exam.Stats %>% kable(escape = F) %>% 
+  kable_styling() %>% 
+  column_spec(2, color = ifelse(Pre.Exam.Stats$`Arm Score` < 50, 'red', ifelse(Pre.Exam.Stats$`Arm Score` < 70, 'orange', 'black'))) %>% 
+  column_spec(4, color = ifelse(Pre.Exam.Stats$`IRTARM RS` < .15, 'red', ifelse(Pre.Exam.Stats$`IRTARM RS` < .20, 'orange', 'black'))) %>% 
+  column_spec(5, color = ifelse(Pre.Exam.Stats$`ERTARM RS` < .15, 'red', ifelse(Pre.Exam.Stats$`ERTARM RS` < .20, 'orange', 'black'))) %>% 
+  column_spec(6, color = ifelse(Pre.Exam.Stats$`STARM RS` < .10, 'red', ifelse(Pre.Exam.Stats$`STARM RS` < .15, 'orange', 'black'))) %>% 
+  column_spec(7, color = ifelse(Pre.Exam.Stats$`GTARM RS` < .10, 'red', ifelse(Pre.Exam.Stats$`GTARM RS` < .15, 'orange', 'black'))) %>% 
+  column_spec(8, color = case_when(
+    Pre.Exam.Stats$`Shoulder Balance` > 1.20 ~ 'red',
+    between(Pre.Exam.Stats$`Shoulder Balance`, 1.06, 1.20) ~ 'orange',
+    between(Pre.Exam.Stats$`Shoulder Balance`, .70, .84) ~ 'orange',
+    Pre.Exam.Stats$`Shoulder Balance` < .70 ~ 'red',
+    .default = 'black'
+  ))
+
+Post.Exam.Losses = datafile %>% 
+  filter(`Exam Type` == "Post") %>% 
+  .[which.max(.$`Exam Date`),] %>% 
+  summarise(`Exam Date`, `Post Strength Loss`, `IRTARM Post Loss`, `ERTARM Post Loss`, `STARM Post Loss`, `GTARM Post Loss`)
+
+Post.Exam.Losses %>% kable(format = "html",  linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 15) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Post.Exam.Losses), border_right = TRUE) %>% 
+  add_header_above(c("Fresh - Quick Pre Exam" = 6), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800")
+  
+
+Pre.Exam.Weights = datafile %>% 
+  filter(`Exam Type` == "Fresh - Quick") %>% 
+  .[which.max(.$`Exam Date`),] %>%
+  summarise(`Total Strength`, `IRTARM Strength`, `ERTARM Strength`, `STARM Strength`, `GTARM Strength`,)
+
+Post.Exam.Weights = datafile %>% 
+  filter(`Exam Type` == "Post") %>% 
+  .[which.max(.$`Exam Date`),] %>% 
+  summarise(`Total Strength Post`, `IRTARM Post Strength`, `ERTARM Post Strength`, `STARM Post Strength`, `GTARM Post Strength`)
+
+rbind(Pre.Exam.Weights, Post.Exam.Weights)
+
+

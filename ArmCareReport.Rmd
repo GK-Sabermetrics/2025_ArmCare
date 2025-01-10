@@ -31,7 +31,7 @@ library(knitr)
 library(scales)
 library(pandoc)
 library(ggrepel)
-library(ggplot2)=
+library(ggplot2)
 opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(fig.pos = '!h')
 ```
@@ -56,6 +56,47 @@ knitr::opts_chunk$set(fig.pos = '!h')
 \begin{center}
 \textbf{\normalsize `r params$date` `r params$pitcher`}
 \end{center}
+
+
+
+```{r, Pre Exam Stats}
+Pre.Exam.Stats %>% 
+  kable(format = "latex",  linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 10) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Pre.Exam.Stats), border_right = TRUE) %>% 
+  add_header_above(c("Fresh - Quick Pre Exam" = 7), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800") %>% 
+  footnote(general = "TARM = Throwing Arm, RS = Relative Strength (Strength/Bodyweight)",
+           fixed_small_size = T) %>% 
+  column_spec(2, color = ifelse(Pre.Exam.Stats$`Arm Score` < 50, 'red', ifelse(Pre.Exam.Stats$`Arm Score` < 70, 'orange', 'black'))) %>% 
+  column_spec(3, color = ifelse(Pre.Exam.Stats$`IRTARM RS` < .15, 'red', ifelse(Pre.Exam.Stats$`IRTARM RS` < .20, 'orange', 'black'))) %>% 
+  column_spec(4, color = ifelse(Pre.Exam.Stats$`ERTARM RS` < .15, 'red', ifelse(Pre.Exam.Stats$`ERTARM RS` < .20, 'orange', 'black'))) %>% 
+  column_spec(5, color = ifelse(Pre.Exam.Stats$`STARM RS` < .10, 'red', ifelse(Pre.Exam.Stats$`STARM RS` < .15, 'orange', 'black'))) %>% 
+  column_spec(6, color = ifelse(Pre.Exam.Stats$`GTARM RS` < .10, 'red', ifelse(Pre.Exam.Stats$`GTARM RS` < .15, 'orange', 'black'))) %>% 
+  column_spec(7, color = case_when(
+    Pre.Exam.Stats$`Shoulder Balance` > 1.20 ~ 'red',
+    between(Pre.Exam.Stats$`Shoulder Balance`, 1.06, 1.20) ~ 'orange',
+    between(Pre.Exam.Stats$`Shoulder Balance`, .70, .84) ~ 'orange',
+    Pre.Exam.Stats$`Shoulder Balance` < .70 ~ 'red',
+    .default = 'black'
+  ))
+
+```
+
+```{r}
+Pre.Exam.Weights %>% kable(escape = F) %>% kable_styling()
+```
+
+```{r}
+Post.Exam.Weights %>% kable(escape = F) %>% kable_styling()
+```
+
+```{r}
+Post.Exam.Losses %>% kable(escape = F) %>% kable_styling()
+```
+
 
 ```{r, echo=FALSE, warning=FALSE, fig.width=7.8, fig.height = 3.4, fig.align='center'} 
 # pitch_movement_plot
