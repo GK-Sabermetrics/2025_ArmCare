@@ -8,9 +8,9 @@ data = read_xlsx("Daily Log 12-24-2024 2-21-48.xlsx", sheet = "All Data")
 pitcher = filter(data, `Last Name` == "Mummert" )
 
 Pitcher = pitcher %>% 
-  filter(`Exam Type` == "Fresh - Quick") %>% 
   mutate(
-    `Exam Date` = as.Date(`Exam Date`, format = "%m/%d/%Y")
+    `Exam Date` = as.Date(`Exam Date`, format = "%m/%d/%Y"),
+    "Short Date" = format(`Exam Date`, "%m-%d"), .after = `Exam Date`
   ) %>% arrange(`Exam Date`)
   
 strength_num = 
@@ -19,12 +19,12 @@ Pitcher %>% group_by(`Exam Date`) %>%
   arrange(`Exam Date`)
 
 Arm.Data = Pitcher %>% 
-  select(`Exam Date`, `Exam Type`, `IRTARM ROM`, `ERTARM ROM`, `FTARM ROM`) %>% 
+  select(`Exam Date`, `Short Date`, `IRTARM ROM`, `ERTARM ROM`, `FTARM ROM`) %>% 
   mutate(`Exam Date` = as.character(`Exam Date`))
 
 arm_data = pivot_longer(Arm.Data, cols = c(`IRTARM ROM`, `ERTARM ROM`), names_to = "Metric", values_to = 'Score')
 
-ggplot(arm_data, aes(x = `Exam Date`, y = Score, color = `Exam Type`, linetype = Metric, group = interaction(`Metric`, `Exam Type`))) +
+ggplot(arm_data, aes(x = `Short Date`, y = Score, color = Metric, group = Metric)) +
   geom_line() +
   geom_point() +  # Optional: Add points for clarity
   #scale_x_date(date_labels = "%m/%d", date_breaks = '7 days') +
@@ -32,23 +32,70 @@ ggplot(arm_data, aes(x = `Exam Date`, y = Score, color = `Exam Type`, linetype =
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggplot(Pitcher, aes(x = `Exam Date`)) +
-  geom_point(aes(y = `Arm Score`), size = 3) +
-  geom_text(aes(y = `Arm Score`, label = format(`Exam Date`, "%m-%d")), nudge_x = -3) +
-  scale_x_date(date_labels = "%m/%d", date_breaks = '1 week') +
-  geom_line(aes(y = `Arm Score`)) +
-  theme_bw()
 
+Pitcher %>% filter(`Exam Type` == "Fresh - Quick") %>% 
+ggplot(aes(x = `Short Date`, y = `Arm Score`)) +
+  geom_point(size = 3) +
+  geom_line(group = 1) +
+  labs(x = "Date", y = "Arm Score", title = "Arm Score") +
+  theme_bw()
 
 data_long = pivot_longer(strength_num, cols = c("Total Strength", 'Total Strength Post')) %>% na.omit()
 
-ggplot(data_long, aes(x = `Exam Date`, y = value, group = name, color = name)) +
+
+
+Pitcher %>% group_by(`Short Date`) %>% 
+  summarise(`Total Strength`, `Total Strength Post`) %>% 
+  pivot_longer(cols = c("Total Strength", 'Total Strength Post')) %>% na.omit() %>% 
+ggplot(aes(x = `Short Date`, y = value, group = name, color = name)) +
   geom_line() +
-  geom_point() +  # Optional: Add points for clarity
-  scale_x_date(date_labels = "%m/%d", date_breaks = '7 days') +
-  labs(x = "Date", y = "Value", color = "Metric", title = "test") +
+  geom_point() +
+  labs(x = "Date", y = "Value", color = "Metric", title = "Total Strength Pre vs Post") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top")
+
+
+datafile %>% filter(`Exam Type` != 'Arm Primer') %>% 
+  select(`Short Date`, `Exam Type`, `IRTARM ROM`) %>% 
+  pivot_longer(c(3)) %>% 
+ggplot(aes(x = `Short Date`, y = value, group = `Exam Type`, color = `Exam Type`)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Date", y = "Degrees", color = "Exam", title = "IR Throwing Arm ROM") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top")
+
+datafile %>% filter(`Exam Type` != 'Arm Primer') %>% 
+  select(`Short Date`, `Exam Type`, `ERTARM ROM`) %>% 
+  pivot_longer(c(3)) %>% 
+  ggplot(aes(x = `Short Date`, y = value, group = `Exam Type`, color = `Exam Type`)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Date", y = "Degrees", color = "Exam", title = "ER Throwing Arm ROM") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top")
+
+datafile %>% filter(`Exam Type` != 'Arm Primer') %>% 
+  select(`Short Date`, `Exam Type`, `FTARM ROM`) %>% 
+  pivot_longer(c(3)) %>% 
+  ggplot(aes(x = `Short Date`, y = value, group = `Exam Type`, color = `Exam Type`)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Date", y = "Degrees", color = "Exam", title = "Flexion Throwing Arm ROM") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top")
+
+datafile %>% filter(`Exam Type` != 'Arm Primer') %>% 
+  select(`Short Date`, `Exam Type`, `TARM TARC`) %>% 
+  pivot_longer(c(3)) %>% 
+  ggplot(aes(x = `Short Date`, y = value, group = `Exam Type`, color = `Exam Type`)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(breaks = c(180,190,200,210,220,230,240)) +
+  labs(x = "Date", y = "Degrees", color = "Exam", title = "Throwing Arm Total Arc") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "top")
+
 
 PitcherArmStats = 
 Pitcher %>% 
@@ -200,6 +247,41 @@ Post.Exam.Weights = datafile %>%
   .[which.max(.$`Exam Date`),] %>% 
   summarise(`Total Strength Post`, `IRTARM Post Strength`, `ERTARM Post Strength`, `STARM Post Strength`, `GTARM Post Strength`)
 
-rbind(Pre.Exam.Weights, Post.Exam.Weights)
+Pre.Exam.Weights %>% 
+  kable(format = "html",  linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 15) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Post.Exam.Losses), border_right = TRUE) %>% 
+  add_header_above(c("Pre Exam Strength Measurements" = 6), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800")
+
+Post.Exam.Weights %>% 
+  kable(format = "html",  linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 15) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Post.Exam.Losses), border_right = TRUE) %>% 
+  add_header_above(c("Post Exam Strength Measurements" = 6), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800")
 
 
+
+
+
+
+datafile %>% 
+  head(10) %>% 
+  summarise(`Short Date`,`Exam Type`,`Arm Score`,`IRTARM RS`,`ERTARM RS`)
+
+
+
+merge(a,b, by = "Short Date", incomparables = T)
+
+datafile[,which.max(datafile$`Exam Date`)]
+
+datafile$`Exam Date`
+
+datafile$`Exam Date`
+
+between(datafile$`Exam Date`, )

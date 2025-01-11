@@ -19,7 +19,7 @@ suppressWarnings(suppressMessages({
 
 file = read_xlsx("Daily Log 12-24-2024 2-21-48.xlsx", sheet = "All Data")
 
-pitcher = 'Lawson Cole'
+pitcher = 'Wyatt Mummert'
 
 date = '12/22/24'
 

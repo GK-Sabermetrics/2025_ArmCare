@@ -54,11 +54,11 @@ knitr::opts_chunk$set(fig.pos = '!h')
 
 \vspace{-4mm} 
 \begin{center}
-\textbf{\normalsize `r params$date` `r params$pitcher`}
+\textbf{\fontsize{16}{16}\selectfont `r params$date` `r params$pitcher`}
 \end{center}
 
 
-
+\vspace{-3mm}
 ```{r, Pre Exam Stats}
 Pre.Exam.Stats %>% 
   kable(format = "latex",  linesep = "", align = 'c', escape = F) %>%
@@ -85,22 +85,58 @@ Pre.Exam.Stats %>%
 
 ```
 
-```{r}
-Pre.Exam.Weights %>% kable(escape = F) %>% kable_styling()
-```
+\vspace{-4mm}
 
 ```{r}
-Post.Exam.Weights %>% kable(escape = F) %>% kable_styling()
+Pre.Exam.Weights %>% 
+  kable(format = "latex", linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 10) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Pre.Exam.Weights), border_right = TRUE) %>% 
+  add_header_above(c("Pre Exam Strength Measurements (LBS)" = 6), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800")
 ```
+
+\vspace{-9mm}
 
 ```{r}
-Post.Exam.Losses %>% kable(escape = F) %>% kable_styling()
+Post.Exam.Weights %>%
+  kable(format = "latex",  linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 10) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Post.Exam.Weights), border_right = TRUE) %>% 
+  add_header_above(c("Post Exam Strength Measurements (LBS)" = 6), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800")
+```
+
+\vspace{-9mm}
+
+```{r}
+Post.Exam.Losses %>% 
+  kable(format = "latex",  linesep = "", align = 'c', escape = F) %>%
+  kable_styling(latex_options = "HOLD_position", position = "center", font_size = 10) %>% 
+  row_spec(0, background = "#f76800", color = 'white') %>% 
+  column_spec(1, border_left = T) %>% 
+  column_spec(ncol(Post.Exam.Losses), border_right = TRUE) %>% 
+  add_header_above(c("Post Exam Strength Losses (LBS)" = 6), border_left = T, 
+                   border_right = T, color = 'white', background = "#f76800")
 ```
 
 
+```{r, echo=FALSE, warning=FALSE, fig.width=8, fig.height = 3.6, fig.align='center'} 
+grid.arrange(arm_score_plot, strength_plot, ncol = 2)
+```
+
+```{r, echo=FALSE, warning=FALSE, fig.width=8, fig.height = 3.6, fig.align='center'} 
+grid.arrange(ir_rom_plot, er_rom_plot, ncol = 2)
+```
+
+\newpage
+
+\vspace{20mm}
 ```{r, echo=FALSE, warning=FALSE, fig.width=7.8, fig.height = 3.4, fig.align='center'} 
-# pitch_movement_plot
-# arm_angle_plot
-
-arm_score_plot
+grid.arrange(f_rom_plot, t_arc_plot, ncol = 2)
 ```
+
